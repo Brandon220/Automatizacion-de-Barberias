@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs"); // O "bcrypt" si lo instalaste así
 const jwt = require("jsonwebtoken");
-const User = require('../models/user'); // Importamos el modelo de usuario
+const User = require('../models/User'); // Importamos el modelo de usuario
 
 // 📌 LOGIN
 router.post("/login", async (req, res) => {
