@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const Servicio = require('../models/Servicio');
+const Servicio = require('../models/servicio');
 
 // 📌 Obtener todos
 router.get('/', async (req, res) => {
