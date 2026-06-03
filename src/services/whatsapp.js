@@ -1,8 +1,3 @@
-// ─────────────────────────────────────────────
-//  src/services/whatsapp.js
-//  Cliente WhatsApp con whatsapp-web.js
-// ─────────────────────────────────────────────
-
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
 
@@ -13,7 +8,7 @@ async function iniciarWhatsApp() {
     cliente = new Client({
       authStrategy: new LocalAuth({ clientId: "barberia" }),
       puppeteer: {
-        executablePath: "C:\\Users\\Brandon\\.cache\\puppeteer\\chrome\\win64-131.0.6778.204\\chrome-win64\\chrome.exe",
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || "google-chrome-stable",
         headless: true,
         args: [
           "--no-sandbox",
@@ -24,7 +19,6 @@ async function iniciarWhatsApp() {
       },
     });
 
-    // Mostrar QR en la terminal
     cliente.on("qr", (qr) => {
       console.log("\n📱 Escaneá este QR con WhatsApp:\n");
       qrcode.generate(qr, { small: true });
