@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const Cita = require("../models/Cita");
+const Cita = require('../models/cita');
 const enviarNotificacion = require("../utils/notify");
 
 // ⏱️ Duración por servicio
