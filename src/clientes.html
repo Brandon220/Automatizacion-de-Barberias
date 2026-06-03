@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Agendar Cita 💈</h2>
+
+<input id="nombre" placeholder="Nombre">
+<input id="telefono" placeholder="Teléfono">
+<input id="fecha" type="date">
+<input id="hora" type="time">
+<input id="servicio" placeholder="Servicio">
+
+<button onclick="crearCita()">Agendar</button>
+
+<hr>
+
+<h3>Citas</h3>
+<div id="lista"></div>
+
+<script>
+
+async function crearCita() {
+  const cita = {
+    nombre: document.getElementById("nombre").value,
+    telefono: document.getElementById("telefono").value,
+    fecha: document.getElementById("fecha").value,
+    hora: document.getElementById("hora").value,
+    servicio: document.getElementById("servicio").value
+  };
+
+  await fetch("http://localhost:3000/api/citas", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(cita)
+  });
+
+  cargarCitas();
+}
+
+async function cargarCitas() {
+  const res = await fetch("http://localhost:3000/api/citas");
+  const data = await res.json();
+
+  document.getElementById("lista").innerHTML =
+    data.map(c => `
+      <div style="border:1px solid #ccc; padding:10px; margin:5px">
+        <b>${c.nombre}</b><br>
+        ${c.fecha} - ${c.hora}<br>
+        ${c.servicio}
+      </div>
+    `).join("");
+}
+
+cargarCitas();
+
+</script>
+
+</body>
+</html>

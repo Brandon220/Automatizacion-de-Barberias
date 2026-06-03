@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Barbería</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #c9a84c; --gold-light: #e8c97a; --gold-dim: rgba(201,168,76,0.15);
+  --bg: #0a0a0a; --bg2: #111111; --bg3: #181818; --bg4: #1f1f1f;
+  --border: rgba(255,255,255,0.07); --border-gold: rgba(201,168,76,0.3);
+  --text: #f0ebe0; --text-muted: #7a7060; --success: #4caf50; --error: #ef5350;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; display: flex; min-height: 100vh; font-size: 14px; }
+.sidebar { width: 220px; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 24px 16px; flex-shrink: 0; }
+.brand { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: #fff; font-weight: 500; text-align: center; margin-bottom: 32px; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+.sidebar-nav { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.nav-item { background: transparent; border: none; color: var(--text-muted); padding: 12px 14px; border-radius: 8px; text-align: left; font-family: inherit; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s; }
+.nav-item:hover { background: var(--bg3); color: #fff; }
+.nav-item.active { background: var(--gold-dim); color: var(--gold-light); font-weight: 500; }
+.main { flex: 1; padding: 32px; overflow-y: auto; }
+.top-bar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+.page-title h2 { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: #fff; font-weight: 500; margin-bottom: 4px; }
+.page-title p { color: var(--text-muted); font-size: 13px; }
+.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
+.filters-bar { display: flex; gap: 8px; flex-wrap: wrap; }
+.filter-btn { background: var(--bg3); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 6px; font-family: inherit; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+.filter-btn:hover { border-color: rgba(255,255,255,0.15); background: var(--bg4); }
+.filter-btn.active { background: var(--gold); color: #0a0a0a; border-color: var(--gold); font-weight: 500; }
+.filter-input { background: var(--bg3); border: 1px solid var(--border); color: #fff; padding: 8px 12px; border-radius: 6px; font-family: inherit; font-size: 13px; }
+.filter-input:focus { outline: none; border-color: var(--gold); }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 28px; }
+.stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+.stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.stat-value { font-size: 26px; font-weight: 500; color: #fff; font-family: 'Cormorant Garamond', serif; }
+.table-container { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.citas-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+.citas-table th { background: var(--bg3); padding: 14px 18px; color: var(--gold-light); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); }
+.citas-table td { padding: 16px 18px; border-bottom: 1px solid var(--border); color: var(--text); }
+.citas-table tr:last-child td { border-bottom: none; }
+.status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+.status-badge.confirmed { background: rgba(76,175,80,0.1); color: #81c784; }
+.status-badge.pending { background: rgba(239,83,80,0.1); color: #e57373; }
+.status-dot { width: 5px; height: 5px; border-radius: 50%; }
+.status-badge.confirmed .status-dot { background: var(--success); }
+.status-badge.pending .status-dot { background: var(--error); }
+.action-btn { background: transparent; border: none; color: var(--error); cursor: pointer; font-size: 12px; padding: 4px 8px; border-radius: 4px; }
+.action-btn:hover { background: rgba(239,83,80,0.08); }
+.servicios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.servicio-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 20px; transition: border-color 0.2s; }
+.servicio-card:hover { border-color: var(--border-gold); }
+.servicio-nombre { font-size: 16px; color: #fff; font-weight: 500; margin-bottom: 6px; }
+.servicio-precio { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--gold-light); }
+.servicio-desc { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+.servicio-actions { display: flex; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+.horarios-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.horario-panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
+.horario-panel h3 { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: #fff; margin-bottom: 16px; }
+.dias-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.dia-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--bg3); border-radius: 8px; border: 1px solid var(--border); }
+.dia-row.cerrado { border-color: rgba(239,83,80,0.25); background: rgba(239,83,80,0.05); }
+.dia-label { font-size: 13px; color: #fff; }
+.toggle-switch { position: relative; width: 40px; height: 22px; cursor: pointer; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-track { position: absolute; inset: 0; background: rgba(239,83,80,0.3); border-radius: 11px; transition: background 0.3s; }
+.toggle-switch input:checked ~ .toggle-track { background: rgba(76,175,80,0.4); }
+.toggle-thumb { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #ef5350; border-radius: 50%; transition: all 0.3s; pointer-events: none; }
+.toggle-switch input:checked ~ .toggle-thumb { left: 21px; background: #4caf50; }
+.time-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.time-row span { font-size: 12px; color: var(--text-muted); width: 60px; }
+.time-row input[type=time] { background: var(--bg3); border: 1px solid var(--border); color: #fff; padding: 8px 12px; border-radius: 6px; font-family: inherit; font-size: 13px; }
+.time-row input[type=time]:focus { outline: none; border-color: var(--gold); }
+.clientes-filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+.clientes-filters select { background: var(--bg3); border: 1px solid var(--border); color: #fff; padding: 8px 12px; border-radius: 6px; font-family: inherit; font-size: 13px; cursor: pointer; }
+.clientes-filters select:focus { outline: none; border-color: var(--gold); }
+.clientes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.cliente-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+.cliente-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.cliente-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--bg3); border: 1px solid var(--border-gold); display: flex; align-items: center; justify-content: center; color: var(--gold); font-weight: bold; font-size: 13px; flex-shrink: 0; }
+.cliente-nombre { font-size: 15px; color: #fff; font-weight: 500; }
+.cliente-telefono { font-size: 12px; color: var(--text-muted); }
+.cliente-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); padding-top: 12px; border-top: 1px solid var(--border); }
+.cliente-citas { color: var(--gold-light); font-weight: 500; }
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; }
+.modal-box { background: var(--bg2); border: 1px solid var(--border); padding: 28px; border-radius: 12px; width: 95%; max-width: 420px; }
+.modal-title { font-family: 'Cormorant Garamond',serif; font-size: 22px; margin-bottom: 20px; color: #fff; }
+.form-group { margin-bottom: 14px; }
+.form-input { width: 100%; background: var(--bg3); border: 1px solid var(--border); color: #fff; padding: 10px 12px; border-radius: 6px; font-family: inherit; font-size: 13px; display: block; }
+.form-input:focus { outline: none; border-color: var(--gold); }
+.form-lbl { display: block; margin-bottom: 6px; font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #181818; border: 1px solid var(--border); padding: 10px 22px; border-radius: 30px; display: flex; align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: all 0.4s; z-index: 3000; white-space: nowrap; }
+.toast.show { bottom: 30px; }
+.toast-icon { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
+.toast.success .toast-icon { background: var(--success); color: #0a0a0a; }
+.toast.error .toast-icon { background: var(--error); color: #fff; }
+.toast-msg { font-size: 13px; color: #fff; }
+.empty-state { text-align: center; padding: 48px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="brand">Barberia Admin</div>
+  <div class="sidebar-nav">
+    <button class="nav-item active" onclick="showSection('citas', this)"><span>📅</span> Citas</button>
+    <button class="nav-item" onclick="showSection('clientes', this)"><span>👤</span> Clientes</button>
+    <button class="nav-item" onclick="showSection('servicios', this)"><span>✂️</span> Servicios</button>
+    <button class="nav-item" onclick="showSection('horarios', this)"><span>⏱️</span> Horarios</button>
+    <button class="nav-item" onclick="showSection('barberos', this)"><span>💈</span> Barberos</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="top-bar">
+    <div class="page-title">
+      <h2 id="pageTitle">Gestión de Citas</h2>
+      <p id="pageSubtitle">Administra y monitorea todas las reservas</p>
+    </div>
+  </div>
+
+  <!-- CITAS -->
+  <div id="section-citas" class="admin-section">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Citas de Hoy</div><div class="stat-value" id="statHoy">0</div></div>
+      <div class="stat-card"><div class="stat-label">Total del Mes</div><div class="stat-value" id="statMes">0</div></div>
+      <div class="stat-card"><div class="stat-label">Clientes Activos</div><div class="stat-value" id="statClientes">0</div></div>
+    </div>
+    <div class="section-header">
+      <div class="filters-bar">
+        <button class="filter-btn active" onclick="filterCitas('todas', this)">Todas</button>
+        <button class="filter-btn" onclick="filterCitas('hoy', this)">Hoy</button>
+        <button class="filter-btn" onclick="filterCitas('semana', this)">Esta Semana</button>
+      </div>
+      <input type="date" id="filterFecha" class="filter-input" onchange="filterPorFechaExacta()">
+    </div>
+    <div class="table-container">
+      <table class="citas-table">
+        <thead><tr>
+          <th>Cliente</th><th>Servicio</th><th>Barbero</th><th>Fecha y Hora</th><th>Estado</th><th>Acciones</th>
+        </tr></thead>
+        <tbody id="citasTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CLIENTES -->
+  <div id="section-clientes" class="admin-section" style="display:none;">
+    <div class="section-header">
+      <div>
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:22px;color:#fff;font-weight:500;">Base de Clientes</h3>
+        <p style="color:var(--text-muted);font-size:12px;margin-top:4px;">Clientes registrados con citas agendadas</p>
+      </div>
+      <div id="statClientesTotal" style="font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold-light);">0 clientes</div>
+    </div>
+    <div class="clientes-filters">
+      <select id="filtroMes" onchange="filtrarClientes()">
+        <option value="">Todos los meses</option>
+        <option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option>
+        <option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option>
+        <option value="07">Julio</option><option value="08">Agosto</option><option value="09">Septiembre</option>
+        <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+      </select>
+      <select id="filtroDia" onchange="filtrarClientes()">
+        <option value="">Todos los días</option>
+      </select>
+      <input type="text" id="filtroNombre" class="filter-input" placeholder="Buscar por nombre..." oninput="filtrarClientes()" style="width:200px;">
+    </div>
+    <div class="clientes-grid" id="clientesGrid"></div>
+  </div>
+
+  <!-- SERVICIOS -->
+  <div id="section-servicios" class="admin-section" style="display:none;">
+    <div class="section-header">
+      <div>
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:22px;color:#fff;font-weight:500;">Catálogo de Servicios</h3>
+        <p style="color:var(--text-muted);font-size:12px;margin-top:4px;">Gestiona precios y nombres del catálogo</p>
+      </div>
+      <button class="filter-btn active" style="background:var(--gold);color:#0a0a0a;" onclick="abrirModalServicio()">+ Nuevo Servicio</button>
+    </div>
+    <div class="servicios-grid" id="serviciosGrid"></div>
+  </div>
+
+  <!-- HORARIOS -->
+  <div id="section-horarios" class="admin-section" style="display:none;">
+    <div class="section-header">
+      <div>
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:22px;color:#fff;font-weight:500;">Horarios de Atención</h3>
+        <p style="color:var(--text-muted);font-size:12px;margin-top:4px;">Configura los días y horas de atención al cliente</p>
+      </div>
+      <button class="filter-btn active" style="background:var(--gold);color:#0a0a0a;" onclick="guardarHorarios()">💾 Guardar Cambios</button>
+    </div>
+    <div class="horarios-layout">
+      <div class="horario-panel">
+        <h3>Días de Atención</h3>
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px;">Verde = abierto · Rojo = cerrado</p>
+        <div class="dias-grid" id="diasGrid"></div>
+      </div>
+      <div class="horario-panel">
+        <h3>Rango de Horario</h3>
+        <p style="color:var(--text-muted);font-size:12px;margin-bottom:16px;">Define la hora de apertura y cierre</p>
+        <div class="time-row">
+          <span>Apertura</span>
+          <input type="time" id="horaApertura" value="09:00">
+        </div>
+        <div class="time-row">
+          <span>Cierre</span>
+          <input type="time" id="horaCierre" value="20:00">
+        </div>
+        <div style="margin-top:24px;padding:16px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);">
+          <p style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Días cerrados</p>
+          <div id="diasCerradosResumen" style="font-size:13px;color:var(--error);"></div>
+        </div>
+        <div style="margin-top:14px;padding:16px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);">
+          <p style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Días abiertos</p>
+          <div id="diasAbiertosResumen" style="font-size:13px;color:#81c784;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARBEROS -->
+  <div id="section-barberos" class="admin-section" style="display:none;">
+    <div class="section-header">
+      <div>
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:22px;color:#fff;font-weight:500;">Plantilla de Profesionales</h3>
+        <p style="color:var(--text-muted);font-size:12px;margin-top:4px;">Registra o modifica datos del personal</p>
+      </div>
+      <button class="filter-btn active" style="background:var(--gold);color:#0a0a0a;" onclick="abrirModalBarbero()">+ Contratar Barbero</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;" id="gridAdminBarberos"></div>
+  </div>
+</div>
+
+<!-- MODAL SERVICIO -->
+<div class="modal-overlay" id="modalServicioOverlay" onclick="cerrarModalServicio()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title" id="modalServicioTitulo">Nuevo Servicio</div>
+    <input type="hidden" id="formServicioId">
+    <div class="form-group">
+      <span class="form-lbl">Nombre del Servicio</span>
+      <input type="text" id="formServicioNombre" class="form-input" placeholder="Ej: Corte Clásico">
+    </div>
+    <div class="form-group">
+      <span class="form-lbl">Precio</span>
+      <input type="number" id="formServicioPrecio" class="form-input" placeholder="Ej: 8000" min="0">
+    </div>
+    <div class="form-group">
+      <span class="form-lbl">Descripción (opcional)</span>
+      <input type="text" id="formServicioDesc" class="form-input" placeholder="Ej: Incluye lavado y secado">
+    </div>
+    <div class="modal-actions">
+      <button class="filter-btn" onclick="cerrarModalServicio()">Cancelar</button>
+      <button class="filter-btn active" style="background:var(--gold);color:#0a0a0a;" onclick="guardarServicio()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL BARBERO -->
+<div class="modal-overlay" id="modalBarberoOverlay" onclick="cerrarModalBarbero()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title" id="modalBarberoTitulo">Contratar Nuevo Barbero</div>
+    <input type="hidden" id="formBarberoId">
+    <div class="form-group">
+      <span class="form-lbl">Nombre Completo</span>
+      <input type="text" id="formBarberoNombre" class="form-input" placeholder="Ej: Brandon García">
+    </div>
+    <div class="form-group">
+      <span class="form-lbl">Especialidad / Cargo</span>
+      <input type="text" id="formBarberoEspecialidad" class="form-input" placeholder="Ej: Degradados modernos y barba">
+    </div>
+    <div id="contenedorEstadoBarbero" style="display:none;" class="form-group">
+      <span class="form-lbl">Estado del Personal</span>
+      <select id="formBarberoActivo" class="form-input">
+        <option value="true">Activo / Disponible para Citas</option>
+        <option value="false">Inactivo / Baja (Despedido)</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="filter-btn" onclick="cerrarModalBarbero()">Cancelar</button>
+      <button class="filter-btn active" style="background:var(--gold);color:#0a0a0a;" onclick="guardarBarbero()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <div class="toast-icon" id="toastIcon">✓</div>
+  <div class="toast-msg" id="toastMsg">Operación exitosa</div>
+</div>
+
+<script>
+// ── IMPORTANTE: La ruta es /api/servicio (singular) igual que en tu app.js ──
+const API = "http://localhost:3000/api";
+
+let todasLasCitas = [];
+let serviciosData = [];
+let horariosData = {
+  diasAbiertos: { lunes: true, martes: true, miercoles: true, jueves: true, viernes: true, sabado: true, domingo: false },
+  apertura: "09:00",
+  cierre: "20:00"
+};
+
+const DIAS_SEMANA = [
+  { key: 'lunes',    label: 'Lunes'     },
+  { key: 'martes',   label: 'Martes'    },
+  { key: 'miercoles',label: 'Miércoles' },
+  { key: 'jueves',   label: 'Jueves'    },
+  { key: 'viernes',  label: 'Viernes'   },
+  { key: 'sabado',   label: 'Sábado'    },
+  { key: 'domingo',  label: 'Domingo'   },
+];
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadCitas();
+  cargarHorariosGuardados();
+  const mesActual = String(new Date().getMonth() + 1).padStart(2, '0');
+  document.getElementById('filtroMes').value = mesActual;
+  poblarFiltroDia();
+});
+
+function showSection(section, btn) {
+  document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
+  if (btn) btn.classList.add("active");
+  const titles = {
+    citas:     ["Gestión de Citas",       "Administra y monitorea todas las reservas"],
+    clientes:  ["Clientes",               "Base de datos de clientes registrados"],
+    servicios: ["Servicios",              "Gestiona los servicios y precios de la barbería"],
+    horarios:  ["Horarios",               "Configura días y rangos de atención al cliente"],
+    barberos:  ["Gestión del Personal",   "Alta, modificación y despidos de barberos"]
+  };
+  document.getElementById("pageTitle").textContent    = titles[section][0];
+  document.getElementById("pageSubtitle").textContent = titles[section][1];
+  ["citas","clientes","servicios","horarios","barberos"].forEach(s => {
+    const el = document.getElementById(`section-${s}`);
+    if (el) el.style.display = s === section ? "block" : "none";
+  });
+  if      (section === "barberos")  cargarBarberosAdmin();
+  else if (section === "citas")     loadCitas();
+  else if (section === "servicios") renderServicios();
+  else if (section === "clientes")  renderClientes();
+  else if (section === "horarios")  renderDiasGrid();
+}
+
+// ════════════════════════════════════════
+//  CITAS
+// ════════════════════════════════════════
+async function loadCitas() {
+  try {
+    const res = await fetch(`${API}/citas`);
+    if (!res.ok) throw new Error();
+    todasLasCitas = await res.json();
+  } catch {
+    todasLasCitas = [];
+  }
+  renderCitasTable(todasLasCitas);
+  actualizarMetricas(todasLasCitas);
+}
+
+function renderCitasTable(list) {
+  const tbody = document.getElementById("citasTableBody");
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No se encontraron citas agendadas</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(c => `
+    <tr>
+      <td>
+        <div style="font-weight:500;color:#fff">${c.nombre}</div>
+        <div style="font-size:11px;color:var(--text-muted)">📱 ${c.telefono}</div>
+      </td>
+      <td><div style="color:#fff">${c.servicio}</div><div style="font-size:12px;color:var(--text-muted)">30-60 min aprox.</div></td>
+      <td style="color:var(--gold-light)">${c.barbero || 'No asignado'}</td>
+      <td>
+        <div style="color:#fff">📅 ${c.fecha}</div>
+        <div style="font-size:13px;color:var(--text-muted)">⏰ ${c.horaInicio} hs</div>
+      </td>
+      <td><span class="status-badge confirmed"><span class="status-dot"></span>Confirmada</span></td>
+      <td><button class="action-btn" onclick="cancelarCita('${c._id}')">Cancelar Cita</button></td>
+    </tr>`).join("");
+}
+
+function actualizarMetricas(list) {
+  const hoy = new Date().toISOString().split('T')[0];
+  document.getElementById("statHoy").textContent      = list.filter(c => c.fecha === hoy).length;
+  document.getElementById("statMes").textContent      = list.length;
+  document.getElementById("statClientes").textContent = [...new Set(list.map(c => c.telefono))].length;
+}
+
+function filterCitas(rango, btn) {
+  document.querySelectorAll(".filters-bar .filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("filterFecha").value = "";
+  if (rango === "todas") return renderCitasTable(todasLasCitas);
+  if (rango === "hoy") {
+    const hoy = new Date().toISOString().split('T')[0];
+    return renderCitasTable(todasLasCitas.filter(c => c.fecha === hoy));
+  }
+  renderCitasTable(todasLasCitas);
+}
+
+function filterPorFechaExacta() {
+  const f = document.getElementById("filterFecha").value;
+  if (!f) return;
+  document.querySelectorAll(".filters-bar .filter-btn").forEach(b => b.classList.remove("active"));
+  renderCitasTable(todasLasCitas.filter(c => c.fecha === f));
+}
+
+async function cancelarCita(id) {
+  if (!confirm("¿Estás seguro de que deseas cancelar esta cita?")) return;
+  try {
+    const res = await fetch(`${API}/citas/${id}`, { method: "DELETE" });
+    if (res.ok) { showToast("Cita cancelada correctamente.", "success"); loadCitas(); }
+    else showToast("No se pudo cancelar.", "error");
+  } catch { showToast("Error de conexión.", "error"); }
+}
+
+// ════════════════════════════════════════
+//  CLIENTES
+// ════════════════════════════════════════
+function renderClientes() { filtrarClientes(); }
+
+function poblarFiltroDia() {
+  const sel = document.getElementById('filtroDia');
+  sel.innerHTML = '<option value="">Todos los días</option>';
+  for (let i = 1; i <= 31; i++) {
+    const opt = document.createElement('option');
+    opt.value = String(i).padStart(2, '0');
+    opt.textContent = `Día ${i}`;
+    sel.appendChild(opt);
+  }
+}
+
+function filtrarClientes() {
+  const mes    = document.getElementById('filtroMes').value;
+  const dia    = document.getElementById('filtroDia').value;
+  const nombre = document.getElementById('filtroNombre').value.toLowerCase();
+
+  let cf = [...todasLasCitas];
+  if (mes)    cf = cf.filter(c => (c.fecha||'').split('-')[1] === mes);
+  if (dia)    cf = cf.filter(c => (c.fecha||'').split('-')[2] === dia);
+  if (nombre) cf = cf.filter(c => c.nombre.toLowerCase().includes(nombre));
+
+  const map = {};
+  cf.forEach(c => {
+    if (!map[c.telefono]) map[c.telefono] = { nombre: c.nombre, telefono: c.telefono, citas: 0, ultimaFecha: c.fecha };
+    map[c.telefono].citas++;
+    if (c.fecha > map[c.telefono].ultimaFecha) map[c.telefono].ultimaFecha = c.fecha;
+  });
+
+  const clientes = Object.values(map);
+  const total    = [...new Set(todasLasCitas.map(c => c.telefono))].length;
+  document.getElementById("statClientesTotal").textContent = total + " clientes";
+
+  const grid = document.getElementById('clientesGrid');
+  if (!clientes.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">No se encontraron clientes con esos filtros</div>`;
+    return;
+  }
+  grid.innerHTML = clientes.map(cl => {
+    const ini = cl.nombre.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    return `
+      <div class="cliente-card">
+        <div class="cliente-card-header">
+          <div class="cliente-avatar">${ini}</div>
+          <div>
+            <div class="cliente-nombre">${cl.nombre}</div>
+            <div class="cliente-telefono">📱 ${cl.telefono}</div>
+          </div>
+        </div>
+        <div class="cliente-meta">
+          <span>Última visita: ${cl.ultimaFecha}</span>
+          <span class="cliente-citas">${cl.citas} cita${cl.citas !== 1 ? 's' : ''}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════
+//  SERVICIOS  — ruta: /api/servicio  (igual que en app.js)
+// ════════════════════════════════════════
+async function renderServicios() {
+  const grid = document.getElementById('serviciosGrid');
+  grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">Cargando servicios...</div>`;
+  try {
+    const res = await fetch(`${API}/servicio`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    serviciosData = await res.json();
+  } catch(e) {
+    console.error("Error al cargar servicios:", e);
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;color:var(--error);">Error al cargar servicios del servidor.</div>`;
+    return;
+  }
+  if (!serviciosData.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">No hay servicios registrados. Haz clic en '+ Nuevo Servicio'.</div>`;
+    return;
+  }
+  grid.innerHTML = serviciosData.map(s => `
+    <div class="servicio-card">
+      <div class="servicio-nombre">${s.nombre}</div>
+      <div class="servicio-precio">¢${Number(s.precio).toLocaleString('es-CR')}</div>
+      ${s.descripcion ? `<div class="servicio-desc">${s.descripcion}</div>` : ''}
+      <div class="servicio-actions">
+        <button class="filter-btn" style="flex:1;font-size:12px;"
+          onclick='abrirModalServicio("${s._id}", ${JSON.stringify(s.nombre)}, ${s.precio}, ${JSON.stringify(s.descripcion||"")})'>
+          ✏️ Editar
+        </button>
+        <button class="action-btn" onclick="eliminarServicio('${s._id}')">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+function abrirModalServicio(id='', nombre='', precio='', desc='') {
+  document.getElementById('formServicioId').value    = id;
+  document.getElementById('formServicioNombre').value = nombre;
+  document.getElementById('formServicioPrecio').value = precio;
+  document.getElementById('formServicioDesc').value   = desc;
+  document.getElementById('modalServicioTitulo').textContent = id ? 'Editar Servicio' : 'Nuevo Servicio';
+  document.getElementById('modalServicioOverlay').style.display = 'flex';
+}
+function cerrarModalServicio() { document.getElementById('modalServicioOverlay').style.display = 'none'; }
+
+async function guardarServicio() {
+  const id          = document.getElementById('formServicioId').value;
+  const nombre      = document.getElementById('formServicioNombre').value.trim();
+  const precio      = parseFloat(document.getElementById('formServicioPrecio').value);
+  const descripcion = document.getElementById('formServicioDesc').value.trim();
+
+  if (!nombre || isNaN(precio)) { showToast("Nombre y precio son obligatorios.", "error"); return; }
+
+  const datos = { nombre, precio, descripcion };
+  // Ruta singular: /api/servicio  (igual que en app.js y en index.html)
+  const url    = id ? `${API}/servicio/${id}` : `${API}/servicio`;
+  const method = id ? 'PUT' : 'POST';
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(datos)
+    });
+    if (res.ok) {
+      showToast(id ? "Servicio actualizado." : "Servicio creado.", "success");
+      cerrarModalServicio();
+      serviciosData = []; // forzar recarga desde API
+      renderServicios();
+    } else {
+      const txt = await res.text();
+      console.error("Error del servidor:", res.status, txt);
+      showToast(`Error ${res.status} al guardar.`, "error");
+    }
+  } catch(e) {
+    console.error("Error de red:", e);
+    showToast("Error de conexión al guardar servicio.", "error");
+  }
+}
+
+async function eliminarServicio(id) {
+  if (!confirm("¿Eliminar este servicio del catálogo?")) return;
+  try {
+    const res = await fetch(`${API}/servicio/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      showToast("Servicio eliminado.", "success");
+      serviciosData = [];
+      renderServicios();
+    } else showToast("Error al eliminar.", "error");
+  } catch { showToast("Error de conexión.", "error"); }
+}
+
+// ════════════════════════════════════════
+//  HORARIOS  — se guardan en localStorage
+//  (tu app.js no tiene ruta /api/horarios,
+//   si la agregás en el futuro se puede cambiar)
+// ════════════════════════════════════════
+function cargarHorariosGuardados() {
+  try {
+    const guardado = localStorage.getItem('barberiaHorarios');
+    if (guardado) {
+      const parsed = JSON.parse(guardado);
+      if (parsed.diasAbiertos) horariosData.diasAbiertos = parsed.diasAbiertos;
+      if (parsed.apertura)     horariosData.apertura     = parsed.apertura;
+      if (parsed.cierre)       horariosData.cierre       = parsed.cierre;
+    }
+  } catch(e) { console.warn("No se pudieron cargar horarios guardados", e); }
+}
+
+function renderDiasGrid() {
+  cargarHorariosGuardados();
+  document.getElementById('horaApertura').value = horariosData.apertura;
+  document.getElementById('horaCierre').value   = horariosData.cierre;
+
+  const grid = document.getElementById('diasGrid');
+  grid.innerHTML = DIAS_SEMANA.map(d => {
+    const abierto = horariosData.diasAbiertos[d.key];
+    return `
+      <div class="dia-row ${abierto ? '' : 'cerrado'}" id="dia-row-${d.key}">
+        <span class="dia-label">${d.label}</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="dia-${d.key}" ${abierto ? 'checked' : ''} onchange="toggleDia('${d.key}', this.checked)">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>`;
+  }).join('');
+  actualizarResumenHorarios();
+}
+
+function toggleDia(key, checked) {
+  horariosData.diasAbiertos[key] = checked;
+  const row = document.getElementById(`dia-row-${key}`);
+  row.classList.toggle('cerrado', !checked);
+  actualizarResumenHorarios();
+}
+
+function actualizarResumenHorarios() {
+  const cerrados = DIAS_SEMANA.filter(d => !horariosData.diasAbiertos[d.key]).map(d => d.label);
+  const abiertos = DIAS_SEMANA.filter(d =>  horariosData.diasAbiertos[d.key]).map(d => d.label);
+  const elC = document.getElementById('diasCerradosResumen');
+  const elA = document.getElementById('diasAbiertosResumen');
+  if (elC) elC.textContent = cerrados.length ? cerrados.join(', ') : 'Ninguno';
+  if (elA) elA.textContent = abiertos.length ? abiertos.join(', ') : 'Ninguno';
+}
+
+function guardarHorarios() {
+  horariosData.apertura = document.getElementById('horaApertura').value;
+  horariosData.cierre   = document.getElementById('horaCierre').value;
+  try {
+    localStorage.setItem('barberiaHorarios', JSON.stringify(horariosData));
+    showToast("Horarios guardados correctamente.", "success");
+    actualizarResumenHorarios();
+  } catch(e) {
+    console.error(e);
+    showToast("Error al guardar horarios.", "error");
+  }
+}
+
+// ════════════════════════════════════════
+//  BARBEROS
+// ════════════════════════════════════════
+async function cargarBarberosAdmin() {
+  const container = document.getElementById("gridAdminBarberos");
+  container.innerHTML = "<div style='color:var(--text-muted);padding:20px;'>Cargando barberos...</div>";
+  try {
+    const res = await fetch(`${API}/barberos`);
+    if (!res.ok) throw new Error();
+    const barberos = await res.json();
+    if (!barberos.length) {
+      container.innerHTML = "<div style='color:var(--text-muted);padding:20px;'>No hay barberos registrados.</div>";
+      return;
+    }
+    container.innerHTML = barberos.map(b => {
+      const ini      = b.avatarInitials || b.nombre.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2) || "B";
+      const isActivo = b.activo !== false;
+      return `
+        <div class="stat-card" style="border:1px solid ${isActivo ? 'var(--border)' : '#5c1e1e'};">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:44px;height:44px;border-radius:50%;background:var(--bg3);border:1px solid var(--border-gold);display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:bold;font-size:13px;">${ini}</div>
+            <div>
+              <div style="font-size:15px;color:#fff;font-weight:500;">${b.nombre}</div>
+              <div style="font-size:12px;color:var(--text-muted);">${b.especialidad || 'Barbero Profesional'}</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid var(--border);">
+            <span class="status-badge ${isActivo ? 'confirmed' : 'pending'}">
+              <span class="status-dot"></span>${isActivo ? 'Activo' : 'Inactivo'}
+            </span>
+            <div style="display:flex;gap:6px;">
+              <button class="filter-btn" style="padding:5px 10px;font-size:11px;"
+                onclick='abrirModalBarbero("${b._id}", ${JSON.stringify(b.nombre)}, ${JSON.stringify(b.especialidad||"")}, ${isActivo})'>
+                ⚙️ Editar
+              </button>
+              <button class="action-btn" onclick="eliminarBarberoDefinitivo('${b._id}')">🗑️</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch {
+    container.innerHTML = "<div style='color:var(--error);padding:20px;'>Error al cargar barberos.</div>";
+  }
+}
+
+function abrirModalBarbero(id='', nombre='', especialidad='', activo=true) {
+  document.getElementById('formBarberoId').value           = id;
+  document.getElementById('formBarberoNombre').value       = nombre;
+  document.getElementById('formBarberoEspecialidad').value = especialidad;
+  document.getElementById('contenedorEstadoBarbero').style.display = id ? 'block' : 'none';
+  document.getElementById('formBarberoActivo').value       = activo.toString();
+  document.getElementById('modalBarberoTitulo').textContent = id ? 'Modificar Datos de Personal' : 'Contratar Nuevo Barbero';
+  document.getElementById('modalBarberoOverlay').style.display = 'flex';
+}
+function cerrarModalBarbero() { document.getElementById('modalBarberoOverlay').style.display = 'none'; }
+
+async function guardarBarbero() {
+  const id          = document.getElementById('formBarberoId').value;
+  const nombre      = document.getElementById('formBarberoNombre').value.trim();
+  const especialidad = document.getElementById('formBarberoEspecialidad').value.trim() || 'Barbero Profesional';
+  const activo      = document.getElementById('formBarberoActivo').value === 'true';
+  if (!nombre) { showToast("El nombre es obligatorio.", "error"); return; }
+  const datos = { nombre, especialidad, activo, avatarInitials: nombre.split(' ').map(n => n[0]).join('').toUpperCase().substring(0,2) };
+  try {
+    const url    = id ? `${API}/barberos/${id}` : `${API}/barberos`;
+    const method = id ? 'PUT' : 'POST';
+    const res    = await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(datos) });
+    if (res.ok) { showToast(id ? "Barbero actualizado." : "Barbero contratado.", "success"); cerrarModalBarbero(); cargarBarberosAdmin(); }
+    else showToast("Error al guardar.", "error");
+  } catch { showToast("Error de conexión.", "error"); }
+}
+
+async function eliminarBarberoDefinitivo(id) {
+  if (!confirm("¿Eliminar permanentemente este barbero?")) return;
+  try {
+    const res = await fetch(`${API}/barberos/${id}`, { method: 'DELETE' });
+    if (res.ok) { showToast("Barbero eliminado.", "success"); cargarBarberosAdmin(); }
+    else showToast("No se pudo eliminar.", "error");
+  } catch { showToast("Error de conexión.", "error"); }
+}
+
+// ════════════════════════════════════════
+//  TOAST
+// ════════════════════════════════════════
+function showToast(msg, type='success') {
+  const t    = document.getElementById("toast");
+  const icon = document.getElementById("toastIcon");
+  document.getElementById("toastMsg").textContent = msg;
+  icon.textContent = type === 'success' ? '✓' : '✕';
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+</script>
+</body>
+</html>
+
