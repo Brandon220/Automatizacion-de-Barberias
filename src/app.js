@@ -12,7 +12,9 @@ const path = require("path"); // Importamos path
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: "*"
+}));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
