@@ -4,7 +4,7 @@
 // ─────────────────────────────────────────────
 
 const cron = require("node-cron");
-const Cita = require("../models/Cita");
+const Cita = require('../models/cita');
 const { enviarMensaje } = require("../services/whatsapp");
 
 const BARBER_PHONE = process.env.BARBER_PHONE;
