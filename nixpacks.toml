@@ -1,5 +1,5 @@
 [phases.setup]
-aptPkgs = ["chromium", "chromium-driver", "fonts-freefont-ttf", "libatk-bridge2.0-0", "libgtk-3-0", "libnss3", "libxss1", "libasound2", "xvfb"]
+aptPkgs = ["wget", "gnupg", "ca-certificates", "fonts-freefont-ttf", "libatk-bridge2.0-0", "libgtk-3-0", "libnss3", "libxss1", "libasound2", "libgbm1", "libxshmfence1"]
 
-[phases.build]
-cmds = ["which chromium || which chromium-browser || find / -name 'chrom*' -type f 2>/dev/null | head -5"]
+[variables]
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "false"
