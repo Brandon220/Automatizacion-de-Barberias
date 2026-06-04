@@ -1,7 +1,18 @@
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
+const fs = require("fs");
+const path = require("path");
+
 let cliente = null;
+
 async function iniciarWhatsApp() {
+  // Limpiar lock de Chrome si existe
+  const lockPath = path.join("/app/.wwebjs_auth/session-barberia", "SingletonLock");
+  if (fs.existsSync(lockPath)) {
+    fs.unlinkSync(lockPath);
+    console.log("🧹 Lock de Chrome eliminado");
+  }
+
   return new Promise((resolve) => {
     cliente = new Client({
       authStrategy: new LocalAuth({ clientId: "barberia" }),
