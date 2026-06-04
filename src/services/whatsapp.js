@@ -1,18 +1,13 @@
 const { Client, LocalAuth } = require("whatsapp-web.js");
 const qrcode = require("qrcode-terminal");
+const QRCode = require("qrcode");
 const fs = require("fs");
 const path = require("path");
 
 let cliente = null;
+let qrImageBase64 = null;
 
 async function iniciarWhatsApp() {
-  // Limpiar lock de Chrome si existe
-  const lockPath = path.join("/app/.wwebjs_auth/session-barberia", "SingletonLock");
-  if (fs.existsSync(lockPath)) {
-    fs.unlinkSync(lockPath);
-    console.log("🧹 Lock de Chrome eliminado");
-  }
-
   return new Promise((resolve) => {
     cliente = new Client({
       authStrategy: new LocalAuth({ clientId: "barberia" }),
@@ -28,12 +23,14 @@ async function iniciarWhatsApp() {
         ],
       },
     });
-    cliente.on("qr", (qr) => {
+    cliente.on("qr", async (qr) => {
       console.log("\n📱 Escaneá este QR con WhatsApp:\n");
       qrcode.generate(qr, { small: true });
+      qrImageBase64 = await QRCode.toDataURL(qr);
     });
     cliente.on("ready", () => {
       console.log("✅ WhatsApp conectado correctamente");
+      qrImageBase64 = null;
       resolve(cliente);
     });
     cliente.on("auth_failure", (msg) => {
@@ -45,6 +42,11 @@ async function iniciarWhatsApp() {
     cliente.initialize();
   });
 }
+
+function getQRImage() {
+  return qrImageBase64;
+}
+
 function formatPhone(telefono) {
   const limpio = (telefono || "").replace(/\D/g, "");
   const numero = limpio.length >= 10 ? limpio : "506" + limpio;
@@ -63,4 +65,4 @@ async function enviarMensaje(telefono, texto) {
     console.error("❌ Error enviando mensaje a", telefono, ":", err.message);
   }
 }
-module.exports = { iniciarWhatsApp, enviarMensaje };
+module.exports = { iniciarWhatsApp, enviarMensaje, getQRImage };
