@@ -3,10 +3,8 @@ const qrcode = require("qrcode-terminal");
 const QRCode = require("qrcode");
 const fs = require("fs");
 const path = require("path");
-
 let cliente = null;
 let qrImageBase64 = null;
-
 async function iniciarWhatsApp() {
   return new Promise((resolve) => {
     cliente = new Client({
@@ -19,7 +17,6 @@ async function iniciarWhatsApp() {
           "--disable-setuid-sandbox",
           "--disable-dev-shm-usage",
           "--disable-gpu",
-          "--single-process",
         ],
       },
     });
@@ -42,11 +39,9 @@ async function iniciarWhatsApp() {
     cliente.initialize();
   });
 }
-
 function getQRImage() {
   return qrImageBase64;
 }
-
 function formatPhone(telefono) {
   const limpio = (telefono || "").replace(/\D/g, "");
   const numero = limpio.length >= 10 ? limpio : "506" + limpio;
