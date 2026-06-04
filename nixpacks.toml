@@ -1,6 +1,6 @@
 [phases.setup]
-aptPkgs = ["chromium", "chromium-driver", "fonts-freefont-ttf", "libatk-bridge2.0-0", "libgtk-3-0", "libnss3", "libxss1", "libasound2"]
+aptPkgs = ["chromium-browser", "fonts-freefont-ttf", "libatk-bridge2.0-0", "libgtk-3-0", "libnss3", "libxss1", "libasound2"]
 
 [variables]
 PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
-PUPPETEER_EXECUTABLE_PATH = "/usr/bin/chromium"
+PUPPETEER_EXECUTABLE_PATH = "/usr/bin/chromium-browser"
